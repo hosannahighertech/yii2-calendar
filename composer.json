@@ -1,0 +1,21 @@
+{
+    "name": "hosannahighertech/yii2-calendar",
+    "description": "Simple Calendar for filtering data via date",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension","calendar"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hosanna Higher Technologies Ltd",
+            "email": "support@hosannahighertech.co.tz"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "hosannahighertech\\widgets\\": ""
+        }
+    }
+}
