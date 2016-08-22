@@ -19,7 +19,8 @@ class CalendarSimple extends \yii\base\Widget
     public $actionRoute = ['action/index']; 
     
     public $currentDate = null;
-    public $dateFormat = 'F';
+    public $dateFormat = 'F Y';
+    public $type = 'F Y';
     
     public function init()
     {
@@ -50,11 +51,13 @@ class CalendarSimple extends \yii\base\Widget
                 <tbody></tbody>
             </table>';
         
-        
-        return $this->createCalendar($tableBegin, $tableEnd);
+        if($this->type=='weekly')
+            return $this->createWeeklyCalendar();
+        else
+            return $this->createSimpleCalendar($tableBegin, $tableEnd);
     }
     
-    public function createCalendar($tableBegin, $tableEnd)
+    public function createSimpleCalendar($tableBegin, $tableEnd)
     {
         $title = ''; 
         $time = $this->currentDate; 
@@ -110,5 +113,55 @@ class CalendarSimple extends \yii\base\Widget
         }
         $result = $result.$tableEnd.'</div>';
         return $result;
+    }
+    
+    
+    public function createWeeklyCalendar()
+    {
+        $title = ''; 
+        $time = $this->currentDate;  
+        
+        if(!is_numeric($this->currentDate))  
+            $time = strtotime($this->currentDate);  
+        
+        $month = intval(date('m', $time));
+        $year = intval(date('Y', $time)); 
+        
+        $year = date('Y');
+        //$week_count = date('W', strtotime($year . '-12-31')); //get all weeks in years
+        $week_count = date('W', time()); 
+
+        $result = '<table class="table table-bordered table-condensed table-responsive">';  
+        for($i=1; $i<=$week_count; $i++)
+        {
+            $row = '<tr>';
+            for($col=0; $col<6 & $i<=$week_count; $col++)
+            { 
+                $row = $row.'<td style="text-align:center;">';  
+                
+                $startEndDates = $this->getStartAndEndDate($i, $year); 
+                $title = Yii::t('app', '<h4>Week {w} </h4>{s} - {e}', ['w'=>$i, 's'=>$startEndDates[0], 'e'=>$startEndDates[1]]);
+                
+                $actionRoute = $this->actionRoute;
+                $actionRoute['week'] = $i; 
+                $actionRoute['year'] = $year;  
+                $dayLink = Html::a(Yii::t('app', $title, ['style'=>'text-align:center;']), Url::to($actionRoute));            
+                $row = $row.$dayLink;  
+                
+                $row .='</td>'; 
+                $i++;
+            }
+            $i--;
+            $row .='</tr>'; 
+            $result .= $row;
+        }
+        $result = $result.'</table></div>';
+        return $result;
+    }
+
+    function getStartAndEndDate($week, $year){
+        $dates[0] = date("M d", strtotime($year.'W'.str_pad($week, 2, 0, STR_PAD_LEFT)));
+        $dates[1] = date("d", strtotime($year.'W'.str_pad($week, 2, 0, STR_PAD_LEFT).' +6 days'));
+        return $dates;
     }
 }
