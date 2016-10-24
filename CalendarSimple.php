@@ -74,6 +74,9 @@ class CalendarSimple extends \yii\base\Widget
         $month = intval(date('m', $time));
         $year = intval(date('Y', $time));
         
+        $timeOfFirstDay = strtotime($year.'-'.$month.'-1');      
+        $dayOfMonth = date('N',$timeOfFirstDay);
+        
         $prevRoute = $this->monthRoute;
         $prevRoute['month'] = $month == 1? 1 : $month-1;
         $previous = Html::a(Yii::t('app', '<span class="pull-left">&laquo;</span>'), Url::to($prevRoute));
@@ -86,6 +89,8 @@ class CalendarSimple extends \yii\base\Widget
         $result = '<div><h3 style="text-align:center;">'.$previous.' '.$title.' '.$next.'</h3>'.$tableBegin;
         //get total days in month
         $days = cal_days_in_month(CAL_GREGORIAN, $month, $year);  
+        //add offset of when day one is supposed to be (its not always on monday)
+        //$days+=$dayOfMonth
         for($i=1; $i<=$days; $i++)
         {
             $result = $result.'<tr>';
@@ -95,6 +100,16 @@ class CalendarSimple extends \yii\base\Widget
                 $actionRoute['day'] = $i;
                 $actionRoute['month'] = $month;
                 $actionRoute['year'] = $year; 
+                
+                if($dayOfMonth>1)
+                {
+                    $multiplied = str_repeat("<td> </td>", $dayOfMonth-1); 
+                    $result = $result.$multiplied;
+                    $j = $j+$dayOfMonth-1;
+                    //reset to 1 so that this is done once only
+                    $dayOfMonth = 1;
+                }
+                
                 if($i==intval(date('d')))
                 {
                     $dayLink = Html::a(Yii::t('app', $i), Url::to($actionRoute), ['class'=>'text-warning']);                
